@@ -9,6 +9,7 @@ import locals as LC
 from google.oauth2 import service_account
 DLIST=[] # list of date for load
 ## CREDENTIALS = service_account.Credentials.from_service_account_file(LC.TOKEN_AUTH)
+f = lambda x:'secondtime_Mon_depth' if x.strftime("%a") == 'Mon' else 'secondtime_depth'
 
 def to_bigq(r, ds, tbl):
     global CREDENTIALS
@@ -20,26 +21,24 @@ def to_bigq(r, ds, tbl):
     return
 
 def load_from_appm(xtable, xfields, xdate_since, xdate_until, xname):
-    parA = {'application_id': LC.APPLICATION_ID ,
+    PARAMS = {'application_id': LC.APPLICATION_ID ,
             'date_since': xdate_since + ' 00:00:00',
             'date_until': xdate_until + ' 23:59:59',
-            'date_dimension': 'default'}
-    parB = {'use_utf8_bom': 'true',
+            'date_dimension': 'default',
+            'use_utf8_bom': 'true',
             'fields': xfields}
-    PARAMS = dict(parA)
-    PARAMS.update(parB)
-    key = "OAuth AgAEA7qi2BGOAAW45YmXjzra-k8LgcDHAG5CSrE"
+
+
     URL = 'https://api.appmetrica.yandex.ru/logs/v1/export/' + xtable + '.json?'
     # Authorization: OAuth
-    headers = {"Authorization": key}
-    print("GET requests from appmetrica table: ", xtable,xdate_since,xdate_until)  # ," fields-",xfields)
+    headers = {"Authorization": ' OAuth '+LC.APPMETRICA_YAPASPORT_KEY}
+    print("GET requests from appmetrica table: ", xtable,xdate_since,xdate_until)
     r = requests.get(URL, params=PARAMS, headers=headers)
     k = 0
     if r.status_code != 200:
         while r.status_code != 200:
             if r.status_code == 400 or r.status_code == 500:
                 print('Bad Code=', r.status_code, ' text=', r.text, 'at=', datetime.datetime.now())
-                # quit()
             time.sleep(10)
             k += 10
 
@@ -78,51 +77,29 @@ def table_lister(date_list):
 
 
 def date_coll(first_time=True):
+    NOW_DATE = datetime.datetime.today()
     if first_time:
-        FIRST_DATE = '2018-05-01'
-        nd = datetime.datetime.now()
-        NOW_DATE = datetime.date(nd.year, nd.month, nd.day)
-        print(NOW_DATE)
-        LAST_DATE = NOW_DATE
-        LAST_DATE -= datetime.timedelta(days=150)
-        print(LAST_DATE)
-        # LAST_DATE=datetime.datetime.now()-datetime.timedelta(month=1)
-
-        DLIST.append( [{'start': FIRST_DATE, 'finish': LAST_DATE.strftime("%Y-%m-%d"), 'name': '_old'}])
-        CURSOR_DATE = LAST_DATE
-        while CURSOR_DATE < NOW_DATE:
-            CURSOR_DATE += datetime.timedelta(days=1)
-
-            DLIST.append({'start': CURSOR_DATE.strftime("%Y-%m-%d")+ ' 00:00:00', 'finish': CURSOR_DATE.strftime("%Y-%m-%d")+ ' 23:59:59',
-                          'name': '_' + CURSOR_DATE.strftime("%Y%m%d")})
-
-
+        CURSOR_DATE=datetime.datetime.today()-datetime.timedelta(days=LC.DATES['firsttime_depth'])
+        DLIST.append( [{'start': LC.DATES['first_date'], 'finish': CURSOR_DATE.strftime("%Y-%m-%d"), 'name': '_old'}])
     else:
-        nd = datetime.datetime.now()
-        NOW_DATE = datetime.date(nd.year, nd.month, nd.day)
+        CURSOR_DATE = NOW_DATE - datetime.timedelta(days=LC.DATES[f(NOW_DATE)])
 
-        if NOW_DATE.strftime("%a") == 'Mon':
-            cnt =  LC.DATES['secondtime_Mon_depth']
-        else:
-            cnt = LC.DATES['secondtime_depth']
 
-        CURSOR_DATE = NOW_DATE - datetime.timedelta(days=cnt)
+        DLIST.append(
+            [{'start': CURSOR_DATE.strftime("%Y-%m-%d"), 'finish': CURSOR_DATE.strftime("%Y-%m-%d"), 'name': '_' + CURSOR_DATE.strftime("%Y%m%d")}])
+    while CURSOR_DATE < NOW_DATE:
+        CURSOR_DATE += datetime.timedelta(days=1)
         fn = CURSOR_DATE.strftime("%Y%m%d")
-        dlist = (
-            [{'start': CURSOR_DATE.strftime("%Y-%m-%d"), 'finish': CURSOR_DATE.strftime("%Y-%m-%d"), 'name': '_' + fn}])
-        while CURSOR_DATE < NOW_DATE:
-            CURSOR_DATE += datetime.timedelta(days=1)
-            fn = CURSOR_DATE.strftime("%Y%m%d")
-            dlist.append({'start': CURSOR_DATE.strftime("%Y-%m-%d"), 'finish': CURSOR_DATE.strftime("%Y-%m-%d"),
+        DLIST.append({'start': CURSOR_DATE.strftime("%Y-%m-%d"), 'finish': CURSOR_DATE.strftime("%Y-%m-%d"),
                           'name': '_' + fn})
 
-    return dlist
+    return
 
 
 if __name__ == "__main__":
     print('started at', datetime.datetime.now())
-    print(LC.DATES['secondtime_Mon_depth'])
-    date_coll()
+
+    date_coll(False)
     print(DLIST)
     #table_lister(date_coll(first_time=True))
     #to_bigq(etl_sessions(), 'appmetrica', 'sessions_last_etl')
