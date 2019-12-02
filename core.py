@@ -7,7 +7,7 @@ import pandas as pd
 import requests
 import locals as LC
 from google.oauth2 import service_account
-
+DLIST=[] # list of date for load
 ## CREDENTIALS = service_account.Credentials.from_service_account_file(LC.TOKEN_AUTH)
 
 def to_bigq(r, ds, tbl):
@@ -88,23 +88,24 @@ def date_coll(first_time=True):
         print(LAST_DATE)
         # LAST_DATE=datetime.datetime.now()-datetime.timedelta(month=1)
 
-        dlist = [{'start': FIRST_DATE, 'finish': LAST_DATE.strftime("%Y-%m-%d"), 'name': '_old'}]
+        DLIST.append( [{'start': FIRST_DATE, 'finish': LAST_DATE.strftime("%Y-%m-%d"), 'name': '_old'}])
         CURSOR_DATE = LAST_DATE
         while CURSOR_DATE < NOW_DATE:
             CURSOR_DATE += datetime.timedelta(days=1)
-            fn = CURSOR_DATE.strftime("%Y%m%d")
-            # print(fn)
-            dlist.append({'start': CURSOR_DATE.strftime("%Y-%m-%d"), 'finish': CURSOR_DATE.strftime("%Y-%m-%d"),
-                          'name': '_' + fn})
 
-            # print(CURSOR_DATE)
+            DLIST.append({'start': CURSOR_DATE.strftime("%Y-%m-%d")+ ' 00:00:00', 'finish': CURSOR_DATE.strftime("%Y-%m-%d")+ ' 23:59:59',
+                          'name': '_' + CURSOR_DATE.strftime("%Y%m%d")})
+
+
     else:
         nd = datetime.datetime.now()
         NOW_DATE = datetime.date(nd.year, nd.month, nd.day)
+
         if NOW_DATE.strftime("%a") == 'Mon':
-            cnt = 30
+            cnt =  LC.DATES['secondtime_Mon_depth']
         else:
-            cnt = 7
+            cnt = LC.DATES['secondtime_depth']
+
         CURSOR_DATE = NOW_DATE - datetime.timedelta(days=cnt)
         fn = CURSOR_DATE.strftime("%Y%m%d")
         dlist = (
@@ -120,6 +121,9 @@ def date_coll(first_time=True):
 
 if __name__ == "__main__":
     print('started at', datetime.datetime.now())
+    print(LC.DATES['secondtime_Mon_depth'])
+    date_coll()
+    print(DLIST)
     #table_lister(date_coll(first_time=True))
     #to_bigq(etl_sessions(), 'appmetrica', 'sessions_last_etl')
     print('finished at', datetime.datetime.now())

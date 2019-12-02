@@ -8,7 +8,7 @@ print(TOKEN_AUTH)
 DATES= {'first_date':'2018-05-01',
         'firsttime_depth':150,
         'secondtime_depth':7,
-        'secondtime_mon_depth':30}
+        'secondtime_Mon_depth':30}
 APPMETRICA_YAPASPORT_KEY='' # get key here https://passport.yandex.ru/registration?mode=register
 
 APPLICATION_ID='' # appmetrica application id like #####
