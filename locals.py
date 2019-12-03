@@ -4,7 +4,6 @@ TOKEN_AUTH =DIR+ '\token.json' #Google Big Query Token file. https://cloud.googl
 GBQ_DATASET_NAME='' # create dataset before first time loading
 FIRST_TIME_LOAD=True # change on false after firtst time loading
 
-print(TOKEN_AUTH)
 DATES= {'first_date':'2018-05-01',
         'firsttime_depth':150,
         'secondtime_depth':7,
@@ -66,7 +65,4 @@ APPMETRICA_FIELDS=[{'table':'clicks',
                               'ios_ifv','mcc','mnc','operator_name','original_device_model','os_name','os_version','profile_id','windows_aid','app_build_number','app_package_name',
                               'app_version_name','application_id']}
                     ]
-#for x in APPMETRICA_FIELDS:
-# print(x['table'])
 
-print([x['fields']  for x in APPMETRICA_FIELDS])
