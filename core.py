@@ -25,8 +25,6 @@ def load_from_appm(xtable, xfields, xdate_since, xdate_until, xname):
             'date_dimension': 'default',
             'use_utf8_bom': 'true',
             'fields': xfields}
-
-
     URL = 'https://api.appmetrica.yandex.ru/logs/v1/export/' + xtable + '.json?'
     # Authorization: OAuth
     headers = {"Authorization": 'OAuth '+LC.APPMETRICA_YAPASPORT_KEY}
