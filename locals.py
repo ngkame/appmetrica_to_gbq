@@ -1,6 +1,6 @@
 import os
 DIR = os.path.dirname(os.path.realpath(__file__))
-TOKEN_AUTH =DIR+ '\token_gbq.json' #Google Big Query Token file. https://cloud.google.com/bigquery/docs/authentication/service-account-file
+TOKEN_AUTH =DIR+ '\token.json' #Google Big Query Token file. https://cloud.google.com/bigquery/docs/authentication/service-account-file
 GBQ_DATASET_NAME='' # create dataset before first time loading
 FIRST_TIME_LOAD=True # change on false after firtst time loading
 
