@@ -2,18 +2,18 @@ import os
 from google.oauth2 import service_account
 
 DIR = os.path.dirname(os.path.realpath(__file__))
-TOKEN_AUTH =DIR+ '\token.json' #Google Big Query Token file. https://cloud.google.com/bigquery/docs/authentication/service-account-file
+TOKEN_AUTH =DIR+ '/token.json' #Google Big Query Token file. https://cloud.google.com/bigquery/docs/authentication/service-account-file
 CREDENTIALS = service_account.Credentials.from_service_account_file(TOKEN_AUTH)
 GBQ_DATASET_NAME='' # create dataset before first time loading
 FIRST_TIME_LOAD=True # change on false after firtst time loading
 
-DATES= {'first_date':'2018-05-01',
+DATES= {'first_date':'2019-01-01',
         'firsttime_depth':150,
         'secondtime_depth':7,
         'secondtime_Mon_depth':30}
 APPMETRICA_YAPASPORT_KEY='' # get key here https://passport.yandex.ru/registration?mode=register
 
-APPLICATION_ID='' # appmetrica application id like #####
+APPLICATION_ID=0000000 # appmetrica application id like #####
 
 #add or delete tables/fields for export
 APPMETRICA_FIELDS=[{'table':'clicks',

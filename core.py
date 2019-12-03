@@ -15,21 +15,20 @@ def load_from_appm(xtable, xfields, xdate_since, xdate_until, xname):
             'date_dimension': 'default',
             'use_utf8_bom': 'true',
             'fields': xfields}
-    print(PARAMS)
-    quit()
-    URL = 'https://api.appmetrica.yandex.ru/logs/v1/export/' + xtable + '.json?'
-    # Authorization: OAuth
-    headers = {"Authorization": 'OAuth '+LC.APPMETRICA_YAPASPORT_KEY}
+    key = "OAuth AgAEA7qi2BGOAAXdwM5gvwwpqE5ggepS3PX-dIM" #+LC.APPMETRICA_YAPASPORT_KEY
+    headers = {"Authorization":key}
     print("GET requests from appmetrica table: ", xtable,xdate_since,xdate_until)
     r = requests.get(URL, params=PARAMS, headers=headers)
+    timer=0
     if r.status_code != 200:
         while r.status_code != 200:
-            if r.status_code == 400 or r.status_code == 500:
-                print('Bad Code=', r.status_code, ' text=', r.text, 'at=', datetime.datetime.now())
+            if r.status_code in [400,500,403]:
+                print('Bad Code=', r.status_code, ' response text=', r.text, 'at=', datetime.datetime.now())
+                quit()
             time.sleep(10) #waiting for server response
+            timer+=10
+            print('awaiting ',timer,' seconds', r.status_code)
             r = requests.get(URL, params=PARAMS, headers=headers)
-
-
     df = pd.read_json(bytes(r.text, 'utf-8'), orient='split')  # ['data']
     del r
     if not df.empty:
@@ -47,7 +46,7 @@ def table_lister():
     for table in LC.APPMETRICA_FIELDS:
         print("1",table['table'])
         for x in DLIST:
-           load_from_appm(table['table'],', '.join(table['fields']), x["start"], x["finish"], table['table'] + x["nm"])  # загрузка таблиц
+           load_from_appm(table['table'],','.join(table['fields']), x["start"], x["finish"], table['table'] + x["nm"])  # загрузка таблиц
 
 def date_coll(first_time=True):
     NOW_DATE = datetime.datetime.today()
@@ -68,7 +67,7 @@ def date_coll(first_time=True):
 
 if __name__ == "__main__":
     print('started at', datetime.datetime.now())
-    date_coll(True)
+    date_coll(False)
     table_lister()
     print('finished at', datetime.datetime.now())
 
