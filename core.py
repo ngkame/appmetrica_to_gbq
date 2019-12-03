@@ -13,9 +13,7 @@ f = lambda x:'secondtime_Mon_depth' if x.strftime("%a") == 'Mon' else 'secondtim
 
 def to_bigq(r, ds, tbl):
     global CREDENTIALS
-    pandas_gbq.to_gbq(
-        r, ds + '.' + tbl, if_exists='replace', credentials=CREDENTIALS
-    )
+
     print("Job finished.")
 
     return
@@ -31,27 +29,22 @@ def load_from_appm(xtable, xfields, xdate_since, xdate_until, xname):
 
     URL = 'https://api.appmetrica.yandex.ru/logs/v1/export/' + xtable + '.json?'
     # Authorization: OAuth
-    headers = {"Authorization": ' OAuth '+LC.APPMETRICA_YAPASPORT_KEY}
+    headers = {"Authorization": 'OAuth '+LC.APPMETRICA_YAPASPORT_KEY}
     print("GET requests from appmetrica table: ", xtable,xdate_since,xdate_until)
     r = requests.get(URL, params=PARAMS, headers=headers)
-    k = 0
+
     if r.status_code != 200:
         while r.status_code != 200:
             if r.status_code == 400 or r.status_code == 500:
                 print('Bad Code=', r.status_code, ' text=', r.text, 'at=', datetime.datetime.now())
             time.sleep(10)
-            k += 10
-
             r = requests.get(URL, params=PARAMS, headers=headers)
 
-    print('request waiting for seconds=', k)
 
     df = pd.read_json(bytes(r.text, 'utf-8'), orient='split')  # ['data']
     if not df.empty:
-        print('data loaded from appm')
-        to_bigq(df, 'appmetrica', xname)
-        # print('quiting') #comment this for normal
-        # quit() #comment this for normal
+        print('data loaded from appmetrica')
+        pandas_gbq.to_gbq( df, LC.GBQ_DATASET_NAME + '.' + xname, if_exists='replace', credentials=CREDENTIALS )
         return True
     else:
         print('no data for loading to Bigquery')
