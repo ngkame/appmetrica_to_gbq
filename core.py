@@ -26,14 +26,16 @@ def load_from_appm(xtable, xfields, xdate_since, xdate_until, xname):
         while r.status_code != 200:
             if r.status_code == 400 or r.status_code == 500:
                 print('Bad Code=', r.status_code, ' text=', r.text, 'at=', datetime.datetime.now())
-            time.sleep(10)
+            time.sleep(10) #waiting for server response
             r = requests.get(URL, params=PARAMS, headers=headers)
 
 
     df = pd.read_json(bytes(r.text, 'utf-8'), orient='split')  # ['data']
+    del r
     if not df.empty:
         print('data loaded from appmetrica')
         pandas_gbq.to_gbq( df, LC.GBQ_DATASET_NAME + '.' + xname, if_exists='replace', credentials=LC.CREDENTIALS )
+        del df
         return True
     else:
         print('no data for loading to Bigquery')
