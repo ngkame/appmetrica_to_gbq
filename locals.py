@@ -1,6 +1,9 @@
 import os
+from google.oauth2 import service_account
+
 DIR = os.path.dirname(os.path.realpath(__file__))
 TOKEN_AUTH =DIR+ '\token.json' #Google Big Query Token file. https://cloud.google.com/bigquery/docs/authentication/service-account-file
+CREDENTIALS = service_account.Credentials.from_service_account_file(TOKEN_AUTH)
 GBQ_DATASET_NAME='' # create dataset before first time loading
 FIRST_TIME_LOAD=True # change on false after firtst time loading
 
